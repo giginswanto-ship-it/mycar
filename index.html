@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Journal Harian Mobilku - Car Daily Logbook</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-blue-500 selection:text-white">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Header & Navigation -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo & Car Badge -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+            <i class="fas fa-car-side text-lg"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 id="headerCarName" class="text-base font-bold text-slate-900 tracking-tight">Mobil Pribadi</h1>
+              <span id="headerPlate" class="px-2 py-0.5 bg-slate-900 text-amber-400 font-mono text-xs font-bold rounded tracking-wider shadow-inner">B 1234 ABC</span>
+            </div>
+            <p id="headerModel" class="text-xs text-slate-500">Toyota Avanza 1.5 G (2023)</p>
+          </div>
+        </div>
+
+        <!-- Desktop Navigation Tabs -->
+        <nav class="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+          <button class="nav-tab-btn px-4 py-2 rounded-lg text-xs font-semibold bg-blue-600 text-white shadow-sm transition flex items-center gap-2" data-tab="dashboard">
+            <i class="fas fa-chart-pie"></i> Dashboard
+          </button>
+          <button class="nav-tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-200 transition flex items-center gap-2" data-tab="logs">
+            <i class="fas fa-book-open"></i> Jurnal Harian
+          </button>
+          <button class="nav-tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-200 transition flex items-center gap-2" data-tab="maintenance">
+            <i class="fas fa-wrench"></i> Servis & Perawatan
+          </button>
+          <button class="nav-tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-200 transition flex items-center gap-2" data-tab="reports">
+            <i class="fas fa-file-invoice-dollar"></i> Laporan & Analisis
+          </button>
+          <button class="nav-tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-200 transition flex items-center gap-2" data-tab="profile">
+            <i class="fas fa-sliders-h"></i> Profil Mobil
+          </button>
+        </nav>
+
+        <!-- Quick Action, DB Badge & Mobile Toggle -->
+        <div class="flex items-center gap-2">
+          <!-- Database Status Badge -->
+          <div id="dbStatusBadge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+            <i class="fas fa-database text-xs text-blue-600"></i> Memuat DB...
+          </div>
+
+          <button id="openAddLogBtn" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition">
+            <i class="fas fa-plus"></i> Catat Jurnal
+          </button>
+          <button id="mobileMenuBtn" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+            <i class="fas fa-bars text-lg"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobileNav" class="hidden md:hidden border-t border-slate-200 bg-white px-4 py-3 space-y-2">
+      <button class="nav-tab-btn w-full text-left px-3 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white flex items-center gap-3" data-tab="dashboard">
+        <i class="fas fa-chart-pie w-5"></i> Dashboard
+      </button>
+      <button class="nav-tab-btn w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100 flex items-center gap-3" data-tab="logs">
+        <i class="fas fa-book-open w-5"></i> Jurnal Harian
+      </button>
+      <button class="nav-tab-btn w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100 flex items-center gap-3" data-tab="maintenance">
+        <i class="fas fa-wrench w-5"></i> Servis & Perawatan
+      </button>
+      <button class="nav-tab-btn w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100 flex items-center gap-3" data-tab="reports">
+        <i class="fas fa-file-invoice-dollar w-5"></i> Laporan & Analisis
+      </button>
+      <button class="nav-tab-btn w-full text-left px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100 flex items-center gap-3" data-tab="profile">
+        <i class="fas fa-sliders-h w-5"></i> Profil Mobil
+      </button>
+      <div class="pt-2">
+        <button onclick="AppUI.openAddLogModal()" class="w-full py-2 bg-blue-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2">
+          <i class="fas fa-plus"></i> Catat Jurnal Sekarang
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ======================================================== -->
+    <!-- TAB 1: DASHBOARD -->
+    <!-- ======================================================== -->
+    <div id="tab-dashboard" class="tab-content active space-y-6">
+
+      <!-- Quick Action Buttons Row -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <button id="quickTripBtn" class="flex items-center gap-3 p-3 bg-white hover:bg-blue-50/50 border border-slate-200 hover:border-blue-300 rounded-2xl transition group shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-105 transition">
+            <i class="fas fa-route text-base"></i>
+          </div>
+          <div class="text-left">
+            <p class="text-xs text-slate-500 font-medium">Catat</p>
+            <p class="text-sm font-bold text-slate-800">Perjalanan</p>
+          </div>
+        </button>
+
+        <button id="quickFuelBtn" class="flex items-center gap-3 p-3 bg-white hover:bg-amber-50/50 border border-slate-200 hover:border-amber-300 rounded-2xl transition group shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center group-hover:scale-105 transition">
+            <i class="fas fa-gas-pump text-base"></i>
+          </div>
+          <div class="text-left">
+            <p class="text-xs text-slate-500 font-medium">Isi</p>
+            <p class="text-sm font-bold text-slate-800">Bahan Bakar</p>
+          </div>
+        </button>
+
+        <button id="quickExpenseBtn" class="flex items-center gap-3 p-3 bg-white hover:bg-rose-50/50 border border-slate-200 hover:border-rose-300 rounded-2xl transition group shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center group-hover:scale-105 transition">
+            <i class="fas fa-receipt text-base"></i>
+          </div>
+          <div class="text-left">
+            <p class="text-xs text-slate-500 font-medium">Catat</p>
+            <p class="text-sm font-bold text-slate-800">Tol / Parkir</p>
+          </div>
+        </button>
+
+        <button id="openAddMaintBtn" class="flex items-center gap-3 p-3 bg-white hover:bg-indigo-50/50 border border-slate-200 hover:border-indigo-300 rounded-2xl transition group shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition">
+            <i class="fas fa-wrench text-base"></i>
+          </div>
+          <div class="text-left">
+            <p class="text-xs text-slate-500 font-medium">Catat</p>
+            <p class="text-sm font-bold text-slate-800">Servis / Oli</p>
+          </div>
+        </button>
+      </div>
+
+      <!-- Top Metrics Row -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Metric 1: Odometer Terkini -->
+        <div class="stat-card-gradient-1 p-5 rounded-2xl text-white shadow-lg shadow-blue-500/10 flex flex-col justify-between relative overflow-hidden">
+          <div class="relative z-10">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-blue-200 uppercase tracking-wider">Odometer Terkini</span>
+              <i class="fas fa-tachometer-alt text-blue-200/80 text-lg"></i>
+            </div>
+            <h3 id="statCurrentOdo" class="text-2xl font-extrabold mt-2 tracking-tight">15.720 km</h3>
+          </div>
+          <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-blue-100">
+            <span>Posisi Kilometer Mobil</span>
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="absolute -bottom-6 -right-6 text-white/5 text-8xl pointer-events-none">
+            <i class="fas fa-tachometer-alt"></i>
+          </div>
+        </div>
+
+        <!-- Metric 2: Jarak Bulan Ini -->
+        <div class="stat-card-gradient-2 p-5 rounded-2xl text-white shadow-lg shadow-emerald-500/10 flex flex-col justify-between relative overflow-hidden">
+          <div class="relative z-10">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-emerald-200 uppercase tracking-wider">Jarak Bulan Ini</span>
+              <i class="fas fa-road text-emerald-200/80 text-lg"></i>
+            </div>
+            <h3 id="statMonthlyDistance" class="text-2xl font-extrabold mt-2 tracking-tight">720 km</h3>
+          </div>
+          <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-emerald-100">
+            <span>Total perjalanan bulan berjalan</span>
+            <i class="fas fa-arrow-trend-up"></i>
+          </div>
+          <div class="absolute -bottom-6 -right-6 text-white/5 text-8xl pointer-events-none">
+            <i class="fas fa-road"></i>
+          </div>
+        </div>
+
+        <!-- Metric 3: Rata-rata Efisiensi BBM -->
+        <div class="stat-card-gradient-3 p-5 rounded-2xl text-white shadow-lg shadow-orange-500/10 flex flex-col justify-between relative overflow-hidden">
+          <div class="relative z-10">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-orange-200 uppercase tracking-wider">Efisiensi BBM</span>
+              <i class="fas fa-gas-pump text-orange-200/80 text-lg"></i>
+            </div>
+            <h3 id="statFuelEfficiency" class="text-2xl font-extrabold mt-2 tracking-tight">12.8 km/L</h3>
+          </div>
+          <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-orange-100">
+            <span>Rata-rata konsumsi bensin</span>
+            <i class="fas fa-leaf"></i>
+          </div>
+          <div class="absolute -bottom-6 -right-6 text-white/5 text-8xl pointer-events-none">
+            <i class="fas fa-gas-pump"></i>
+          </div>
+        </div>
+
+        <!-- Metric 4: Pengeluaran Bulan Ini -->
+        <div class="stat-card-gradient-4 p-5 rounded-2xl text-white shadow-lg shadow-purple-500/10 flex flex-col justify-between relative overflow-hidden">
+          <div class="relative z-10">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-purple-200 uppercase tracking-wider">Biaya Bulan Ini</span>
+              <i class="fas fa-wallet text-purple-200/80 text-lg"></i>
+            </div>
+            <h3 id="statMonthlyExpenses" class="text-2xl font-extrabold mt-2 tracking-tight">Rp 435.000</h3>
+          </div>
+          <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-purple-100">
+            <span>BBM + Tol/Parkir + Servis</span>
+            <i class="fas fa-money-bill-wave"></i>
+          </div>
+          <div class="absolute -bottom-6 -right-6 text-white/5 text-8xl pointer-events-none">
+            <i class="fas fa-wallet"></i>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Service Alerts & Reminders -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Oil Service Card -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center">
+                <i class="fas fa-oil-can text-lg"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-800">Status Ganti Oli Mesin</h4>
+                <p id="oilReminderSub" class="text-xs text-slate-500">Target servis berikutnya</p>
+              </div>
+            </div>
+            <div id="oilReminderStatus" class="text-xs">
+              <span class="text-emerald-600 font-semibold"><i class="fas fa-check-circle"></i> Aman</span>
+            </div>
+          </div>
+          <div class="mt-4">
+            <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+              <div id="oilProgressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: 25%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tax Renewal Card -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center">
+                <i class="fas fa-id-card text-lg"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-800">Jatuh Tempo Pajak STNK</h4>
+                <p id="taxReminderSub" class="text-xs text-slate-500">Pajak tahunan kendaraan</p>
+              </div>
+            </div>
+            <div id="taxReminderStatus" class="text-xs">
+              <span class="text-emerald-600 font-semibold"><i class="fas fa-calendar-check"></i> Aktif</span>
+            </div>
+          </div>
+          <div class="mt-4 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 pt-2">
+            <span>Pastikan STNK selalu diperpanjang tepat waktu</span>
+            <span class="font-medium text-slate-700">1 Tahunan</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Charts & Recent Activity Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left 2 Cols: Fuel Efficiency Trend -->
+        <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h4 class="text-sm font-bold text-slate-800">Tren Efisiensi Bahan Bakar (km/L)</h4>
+              <p class="text-xs text-slate-500">Performa kilometer per liter dari setiap pengisian BBM</p>
+            </div>
+            <span class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-semibold">
+              <i class="fas fa-chart-line mr-1"></i> Real-time
+            </span>
+          </div>
+          <div class="h-64 relative">
+            <canvas id="fuelEfficiencyChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Right 1 Col: Expense Breakdown -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h4 class="text-sm font-bold text-slate-800">Distribusi Biaya</h4>
+                <p class="text-xs text-slate-500">Rincian per kategori</p>
+              </div>
+              <span class="text-xs font-medium text-slate-400"><i class="fas fa-pie-chart"></i></span>
+            </div>
+            <div class="h-56 relative flex items-center justify-center">
+              <canvas id="expenseBreakdownChart"></canvas>
+            </div>
+          </div>
+          <p class="text-center text-xs text-slate-400 mt-2">BBM, Tol, Parkir, Cuci & Servis</p>
+        </div>
+
+      </div>
+
+      <!-- Recent Logs Preview -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h4 class="text-sm font-bold text-slate-800">Aktivitas Terakhir</h4>
+            <p class="text-xs text-slate-500">5 riwayat jurnal terbaru</p>
+          </div>
+          <button onclick="AppUI.switchTab('logs')" class="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+            Lihat Semua <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+        <div id="recentActivitiesList" class="space-y-2">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- TAB 2: JURNAL HARIAN (DAILY LOGS) -->
+    <!-- ======================================================== -->
+    <div id="tab-logs" class="tab-content space-y-4">
+      
+      <!-- Toolbar: Filter, Search & Add -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <!-- Filter Kategori -->
+          <div class="relative">
+            <select id="logFilterType" class="appearance-none bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 py-2.5 pl-3 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="all">Semua Kategori</option>
+              <option value="trip">Perjalanan (Trip)</option>
+              <option value="fuel">Pengisian BBM</option>
+              <option value="expense">Pengeluaran (Tol/Parkir)</option>
+              <option value="note">Catatan Khusus</option>
+            </select>
+            <i class="fas fa-chevron-down absolute right-3 top-3.5 text-xs text-slate-400 pointer-events-none"></i>
+          </div>
+
+          <!-- Search Input -->
+          <div class="relative flex-1 sm:w-64">
+            <i class="fas fa-search absolute left-3.5 top-3 text-xs text-slate-400"></i>
+            <input type="text" id="logSearchInput" placeholder="Cari rute, catatan, atau SPBU..." class="w-full bg-slate-50 border border-slate-200 text-xs text-slate-800 pl-9 pr-3 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+
+        <!-- Add Button -->
+        <button onclick="AppUI.openAddLogModal()" class="w-full sm:w-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2">
+          <i class="fas fa-plus"></i> Tambah Jurnal Baru
+        </button>
+      </div>
+
+      <!-- Table Container -->
+      <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-xs font-semibold uppercase tracking-wider">
+                <th class="py-3.5 px-4">Tanggal & Waktu</th>
+                <th class="py-3.5 px-4">Tipe</th>
+                <th class="py-3.5 px-4">Rute / Detail Keterangan</th>
+                <th class="py-3.5 px-4">Odometer (km)</th>
+                <th class="py-3.5 px-4">Jarak</th>
+                <th class="py-3.5 px-4">Biaya</th>
+                <th class="py-3.5 px-4 text-right no-print">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="logsTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- TAB 3: SERVIS & PERAWATAN (MAINTENANCE) -->
+    <!-- ======================================================== -->
+    <div id="tab-maintenance" class="tab-content space-y-4">
+      
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+        <div>
+          <h3 class="text-sm font-bold text-slate-800">Riwayat Servis & Perawatan Berkala</h3>
+          <p class="text-xs text-slate-500">Pantau penggantian oli, filter, busi, aki, ban, dan servis tune-up</p>
+        </div>
+        <button onclick="AppUI.openAddMaintModal()" class="w-full sm:w-auto px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/20 transition flex items-center justify-center gap-2">
+          <i class="fas fa-wrench"></i> Catat Servis Baru
+        </button>
+      </div>
+
+      <!-- Maintenance Table -->
+      <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-xs font-semibold uppercase tracking-wider">
+                <th class="py-3.5 px-4">Tanggal Servis</th>
+                <th class="py-3.5 px-4">Odometer</th>
+                <th class="py-3.5 px-4">Jenis Servis & Bengkel</th>
+                <th class="py-3.5 px-4">Biaya</th>
+                <th class="py-3.5 px-4">Target Servis Berikutnya</th>
+                <th class="py-3.5 px-4 text-right no-print">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="maintTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- TAB 4: LAPORAN & ANALISIS (REPORTS) -->
+    <!-- ======================================================== -->
+    <div id="tab-reports" class="tab-content space-y-6">
+      
+      <!-- Report Header & Actions -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 no-print">
+        <div>
+          <h3 class="text-base font-bold text-slate-800">Laporan Keuangan & Operasional Mobil</h3>
+          <p class="text-xs text-slate-500">Ringkasan total jarak, efisiensi konsumsi BBM, dan rekapitulasi pengeluaran</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button id="printReportBtn" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+            <i class="fas fa-print"></i> Cetak Laporan
+          </button>
+          <button id="exportCsvBtn" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+            <i class="fas fa-file-excel"></i> Ekspor Excel/CSV
+          </button>
+          <button id="exportJsonBtn" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+            <i class="fas fa-download"></i> Backup JSON
+          </button>
+          <label class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer border border-slate-200">
+            <i class="fas fa-upload"></i> Restore JSON
+            <input type="file" id="importJsonInput" accept=".json" class="hidden">
+          </label>
+        </div>
+      </div>
+
+      <!-- Printable Report Header (Print only) -->
+      <div class="hidden print-only mb-4 border-b border-slate-300 pb-3">
+        <h2 class="text-xl font-bold">Laporan Jurnal & Pemeliharaan Kendaraan</h2>
+        <p class="text-sm">Mobil: <span id="printCarName">Toyota Avanza</span> | Plat: <span id="printCarPlate">B 1234 ABC</span></p>
+      </div>
+
+      <!-- Summary KPI Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+          <span class="text-xs text-slate-400 font-medium">Total Jarak Tempuh</span>
+          <h4 id="repTotalDistance" class="text-lg font-bold text-slate-800 mt-1">0 km</h4>
+        </div>
+        <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+          <span class="text-xs text-slate-400 font-medium">Total Pengeluaran</span>
+          <h4 id="repTotalExpense" class="text-lg font-bold text-rose-600 mt-1">Rp 0</h4>
+        </div>
+        <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+          <span class="text-xs text-slate-400 font-medium">Total Bensin</span>
+          <h4 id="repTotalFuelExpense" class="text-lg font-bold text-amber-600 mt-1">Rp 0</h4>
+        </div>
+        <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+          <span class="text-xs text-slate-400 font-medium">Total Servis</span>
+          <h4 id="repTotalMaintExpense" class="text-lg font-bold text-indigo-600 mt-1">Rp 0</h4>
+        </div>
+        <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+          <span class="text-xs text-slate-400 font-medium">Tol, Parkir & Cuci</span>
+          <h4 id="repTotalOtherExpense" class="text-lg font-bold text-blue-600 mt-1">Rp 0</h4>
+        </div>
+        <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+          <span class="text-xs text-slate-400 font-medium">Estimasi Biaya / km</span>
+          <h4 id="repCostPerKm" class="text-lg font-bold text-emerald-600 mt-1">Rp 0 / km</h4>
+        </div>
+      </div>
+
+      <!-- Distance Chart Bar -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h4 class="text-sm font-bold text-slate-800">Riwayat Jarak Tempuh 6 Bulan Terakhir</h4>
+            <p class="text-xs text-slate-500">Pemakaian kendaraan per bulan dalam kilometer</p>
+          </div>
+          <span class="text-xs text-slate-400"><i class="fas fa-chart-bar"></i></span>
+        </div>
+        <div class="h-64 relative">
+          <canvas id="monthlyDistanceChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Danger Zone / Data Management -->
+      <div class="bg-rose-50/60 border border-rose-200 rounded-2xl p-5 no-print">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div>
+            <h4 class="text-sm font-bold text-rose-800">Manajemen Data & Reset</h4>
+            <p class="text-xs text-rose-600">Hapus seluruh data log dan kembali ke kondisi awal (pastikan telah mengekspor backup terlebih dahulu).</p>
+          </div>
+          <button id="resetDataBtn" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition shadow-sm whitespace-nowrap">
+            <i class="fas fa-trash-alt mr-1"></i> Hapus Semua Data
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- TAB 5: PROFIL MOBIL (SETTINGS) -->
+    <!-- ======================================================== -->
+    <div id="tab-profile" class="tab-content space-y-6">
+      
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
+              <i class="fas fa-car"></i>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-slate-900">Spesifikasi Kendaraan</h3>
+              <p class="text-xs text-slate-500">Konfigurasi mobil, interval servis, dan pengingat STNK</p>
+            </div>
+          </div>
+          <button id="openEditProfileBtn" class="px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+            <i class="fas fa-pencil-alt"></i> Edit Profil
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-6 text-sm">
+          <div>
+            <span class="text-xs font-medium text-slate-400 block">Nama Panggilan Mobil</span>
+            <span id="profViewName" class="font-semibold text-slate-800 text-base">-</span>
+          </div>
+          <div>
+            <span class="text-xs font-medium text-slate-400 block">Nomor Polisi (Plat)</span>
+            <span id="profViewPlate" class="font-mono font-bold text-slate-800 text-base bg-slate-100 px-2 py-0.5 rounded">-</span>
+          </div>
+          <div>
+            <span class="text-xs font-medium text-slate-400 block">Merek & Model</span>
+            <span id="profViewModel" class="font-semibold text-slate-800 text-base">-</span>
+          </div>
+          <div>
+            <span class="text-xs font-medium text-slate-400 block">Tahun Pembuatan</span>
+            <span id="profViewYear" class="font-semibold text-slate-800 text-base">-</span>
+          </div>
+          <div>
+            <span class="text-xs font-medium text-slate-400 block">Jenis Bahan Bakar Utama</span>
+            <span id="profViewFuelType" class="font-semibold text-slate-800 text-base">-</span>
+          </div>
+          <div>
+            <span class="text-xs font-medium text-slate-400 block">Odometer Awal Saat Mulai Jurnal</span>
+            <span id="profViewInitOdo" class="font-semibold text-slate-800 text-base">-</span>
+          </div>
+          <div>
+            <span class="text-xs font-medium text-slate-400 block">Interval Ganti Oli</span>
+            <span id="profViewOilInterval" class="font-semibold text-slate-800 text-base">-</span>
+          </div>
+          <div>
+            <span class="text-xs font-medium text-slate-400 block">Jatuh Tempo Pajak STNK</span>
+            <span id="profViewNextTax" class="font-semibold text-slate-800 text-base">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Database Connection & Server Info Card -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl">
+              <i class="fas fa-server"></i>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-slate-900">Database Relasional & Server Lokal</h3>
+              <p class="text-xs text-slate-500">Koneksi REST API, file database lokal, dan skrip SQL</p>
+            </div>
+          </div>
+          <button id="dbSyncBtn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm">
+            <i class="fas fa-sync-alt"></i> Cek & Sinkronisasi DB
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 text-xs text-slate-600">
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+            <span class="font-bold text-slate-800 block mb-1"><i class="fas fa-file-code text-blue-600 mr-1"></i> Skrip Skema SQL</span>
+            <p>Tersedia berkas skema DDL & DML di folder <code>database/schema.sql</code> dan <code>database/seed.sql</code> untuk SQLite, MySQL, atau PostgreSQL.</p>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+            <span class="font-bold text-slate-800 block mb-1"><i class="fas fa-play-circle text-emerald-600 mr-1"></i> Cara Menjalankan Server</span>
+            <p>Jalankan <code>start_server.bat</code> atau ketik <code>node server.js</code> di terminal untuk mengaktifkan REST API database di <code>http://localhost:3000</code>.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- App Info Card -->
+      <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white rounded-2xl p-6 shadow-md">
+        <div class="flex items-center gap-3 mb-2">
+          <i class="fas fa-shield-alt text-amber-400 text-xl"></i>
+          <h4 class="font-bold text-base">Penyimpanan Aman & Hybrid Ready</h4>
+        </div>
+        <p class="text-xs text-blue-200 leading-relaxed max-w-2xl">
+          Aplikasi ini mendukung penyimpanan ganda: otomatis tersinkron ke database server lokal saat server aktif, dan tetap tersimpan secara aman di browser (<code class="bg-white/10 px-1 py-0.5 rounded text-white">LocalStorage</code>) saat dibuka langsung tanpa server.
+        </p>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-4 mt-auto no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-400">
+      Journal Harian Mobilku &bull; Pemantau Aktivitas, Konsumsi BBM, Servis & Pengeluaran Kendaraan
+    </div>
+  </footer>
+
+  <!-- ======================================================== -->
+  <!-- MODALS -->
+  <!-- ======================================================== -->
+
+  <!-- Modal 1: Tambah / Edit Jurnal Harian -->
+  <div id="logModal" class="modal-container hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 my-8">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 id="logModalTitle" class="text-base font-bold text-slate-900">Tambah Jurnal Harian</h3>
+        <button onclick="AppUI.closeModals()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="logForm" class="mt-4 space-y-4">
+        <input type="hidden" id="logId">
+
+        <!-- Type Selector -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Tipe Aktivitas</label>
+          <select id="logTypeSelect" class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <option value="trip">Perjalanan / Trip</option>
+            <option value="fuel">Pengisian Bahan Bakar (BBM)</option>
+            <option value="expense">Pengeluaran Lain (Tol, Parkir, Cuci)</option>
+            <option value="note">Catatan Khusus / Kondisi Mobil</option>
+          </select>
+        </div>
+
+        <!-- Date & Time Row -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal</label>
+            <input type="date" id="logDate" required class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Waktu</label>
+            <input type="time" id="logTime" class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Odometer Fields (Trip / Fuel) -->
+        <div id="logTripFields" class="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Odo Awal</label>
+            <input type="number" id="logStartOdo" placeholder="15200" class="w-full bg-white border border-slate-200 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Odo Akhir</label>
+            <input type="number" id="logEndOdo" placeholder="15245" class="w-full bg-white border border-slate-200 text-sm rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Jarak (km)</label>
+            <input type="number" id="logDistance" placeholder="45" class="w-full bg-white border border-slate-200 text-sm rounded-lg p-2 font-bold text-blue-600 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Fuel Specific Fields -->
+        <div id="logFuelFields" class="hidden space-y-3 bg-amber-50/60 p-3 rounded-xl border border-amber-200/80">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-amber-900 mb-1">Jumlah Liter</label>
+              <input type="number" step="0.01" id="logFuelLiters" placeholder="25" class="w-full bg-white border border-amber-200 text-sm rounded-lg p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-amber-900 mb-1">Harga / Liter (Rp)</label>
+              <input type="number" id="logFuelPricePerLiter" placeholder="12950" class="w-full bg-white border border-amber-200 text-sm rounded-lg p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-amber-900 mb-1">Jenis Bahan Bakar</label>
+            <select id="logFuelType" class="w-full bg-white border border-amber-200 text-sm rounded-lg p-2 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+              <option value="Pertamax (RON 92)">Pertamax (RON 92)</option>
+              <option value="Pertalite (RON 90)">Pertalite (RON 90)</option>
+              <option value="Pertamax Turbo (RON 98)">Pertamax Turbo (RON 98)</option>
+              <option value="Dexlite">Dexlite</option>
+              <option value="Pertamina Dex">Pertamina Dex</option>
+              <option value="Shell Super">Shell Super</option>
+              <option value="Shell V-Power">Shell V-Power</option>
+              <option value="BP 92">BP 92</option>
+              <option value="BP Ultimate">BP Ultimate</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Expense Category Field -->
+        <div id="logExpenseFields" class="hidden">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Kategori Pengeluaran</label>
+          <select id="logCategorySelect" class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <option value="Tol / Parkir">Tol / Parkir</option>
+            <option value="Cuci Mobil">Cuci Mobil</option>
+            <option value="Tambal / Angin Ban">Tambal / Angin Ban</option>
+            <option value="Aksesoris & Variasi">Aksesoris & Variasi</option>
+            <option value="Pengeluaran Lain">Pengeluaran Lain</option>
+          </select>
+        </div>
+
+        <!-- Route & Cost Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Rute / Lokasi / Keterangan</label>
+            <input type="text" id="logRoute" placeholder="Contoh: Rumah -> Kantor Sudirman" class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Total Biaya (Rp)</label>
+            <input type="number" id="logCost" placeholder="0" class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Catatan Tambahan (Opsional)</label>
+          <textarea id="logNotes" rows="2" placeholder="Kondisi jalan, cuaca, keluhan suara mobil, dll." class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="AppUI.closeModals()" class="px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+            Batal
+          </button>
+          <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition">
+            Simpan Jurnal
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Tambah Riwayat Servis -->
+  <div id="maintModal" class="modal-container hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 my-8">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Catat Riwayat Servis / Perawatan</h3>
+        <button onclick="AppUI.closeModals()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="maintForm" class="mt-4 space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Servis</label>
+            <input type="date" id="maintDate" required class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Odometer Saat Servis (km)</label>
+            <input type="number" id="maintOdo" required placeholder="15000" class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis Perawatan / Servis</label>
+          <input type="text" id="maintServiceType" required placeholder="Contoh: Ganti Oli Mesin & Filter Oli" class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Bengkel</label>
+            <input type="text" id="maintWorkshop" placeholder="Bengkel Resmi / Shop&Drive" class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Total Biaya Servis (Rp)</label>
+            <input type="number" id="maintCost" placeholder="650000" class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Target Odometer Servis Berikutnya (km)</label>
+          <input type="number" id="maintNextOdo" placeholder="20000" class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Rincian Komponen / Catatan Mekanik</label>
+          <textarea id="maintNotes" rows="2" placeholder="Merek oli, pergantian part, catatan teknisi..." class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="AppUI.closeModals()" class="px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+            Batal
+          </button>
+          <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/20 transition">
+            Simpan Riwayat Servis
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Edit Profil Mobil -->
+  <div id="profileModal" class="modal-container hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 my-8">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Edit Profil Kendaraan</h3>
+        <button onclick="AppUI.closeModals()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="profileForm" class="mt-4 space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Mobil</label>
+            <input type="text" id="profName" required class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Nomor Polisi (Plat)</label>
+            <input type="text" id="profPlate" required class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 font-mono uppercase focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Merek & Model</label>
+            <input type="text" id="profModel" required placeholder="Toyota Avanza 1.5 G" class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Tahun Pembuatan</label>
+            <input type="number" id="profYear" placeholder="2023" class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis Bahan Bakar Utama</label>
+            <input type="text" id="profFuelType" placeholder="Pertamax (RON 92)" class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Odometer Awal (km)</label>
+            <input type="number" id="profInitialOdo" class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Interval Ganti Oli (km)</label>
+            <input type="number" id="profOilInterval" placeholder="5000" class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Jatuh Tempo Pajak STNK</label>
+            <input type="date" id="profNextTaxDate" class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Catatan Kendaraan</label>
+          <textarea id="profNotes" rows="2" class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="AppUI.closeModals()" class="px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+            Batal
+          </button>
+          <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition">
+            Simpan Perubahan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main JavaScript Files -->
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
