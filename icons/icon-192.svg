@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="50%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  
+  <!-- Rounded App Icon Background -->
+  <rect width="192" height="192" rx="42" fill="url(#bgGrad)"/>
+  
+  <!-- Decorative Background Ring -->
+  <circle cx="96" cy="96" r="68" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="4" stroke-dasharray="8 6"/>
+
+  <!-- Speedometer Arc -->
+  <path d="M 46 116 A 55 55 0 1 1 146 116" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="8" stroke-linecap="round"/>
+  <path d="M 46 116 A 55 55 0 0 1 115 45" fill="none" stroke="url(#accentGrad)" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Car Silhouette Icon -->
+  <g filter="url(#dropShadow)" transform="translate(41, 75)">
+    <!-- Car Body -->
+    <path d="M 15 26 L 25 10 C 27 7 32 5 38 5 L 72 5 C 78 5 83 7 85 10 L 95 26 C 102 27 106 31 106 37 L 106 50 C 106 53 103 55 100 55 L 98 55 C 98 60 94 64 89 64 C 84 64 80 60 80 55 L 30 55 C 30 60 26 64 21 64 C 16 64 12 60 12 55 L 10 55 C 7 55 4 53 4 50 L 4 37 C 4 31 8 27 15 26 Z" fill="#ffffff"/>
+    
+    <!-- Windshield & Windows -->
+    <path d="M 28 24 L 35 12 C 36 10 39 9 42 9 L 52 9 L 52 24 Z" fill="#1e3a8a" opacity="0.85"/>
+    <path d="M 58 9 L 68 9 C 71 9 74 10 75 12 L 82 24 L 58 24 Z" fill="#1e3a8a" opacity="0.85"/>
+    
+    <!-- Headlights -->
+    <circle cx="16" cy="38" r="4" fill="url(#accentGrad)"/>
+    <circle cx="94" cy="38" r="4" fill="url(#accentGrad)"/>
+    
+    <!-- Wheels -->
+    <circle cx="21" cy="55" r="7" fill="#0f172a"/>
+    <circle cx="21" cy="55" r="3" fill="#94a3b8"/>
+    <circle cx="89" cy="55" r="7" fill="#0f172a"/>
+    <circle cx="89" cy="55" r="3" fill="#94a3b8"/>
+  </g>
+</svg>

@@ -599,6 +599,8 @@ const AppUI = {
   switchTab(tabId) {
     this.currentTab = tabId;
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    
+    // Desktop Nav
     document.querySelectorAll('.nav-tab-btn').forEach(btn => {
       if (btn.dataset.tab === tabId) {
         btn.classList.add('bg-blue-600', 'text-white');
@@ -606,6 +608,15 @@ const AppUI = {
       } else {
         btn.classList.remove('bg-blue-600', 'text-white');
         btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+      }
+    });
+
+    // Mobile Bottom Nav
+    document.querySelectorAll('.mobile-nav-item').forEach(item => {
+      if (item.dataset.tab === tabId) {
+        item.classList.add('active');
+      } else {
+        item.classList.remove('active');
       }
     });
 
@@ -1307,9 +1318,58 @@ const AppUI = {
   }
 };
 
+// PWA & Mobile App Manager
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const banner = document.getElementById('pwaInstallBanner');
+  if (banner) banner.classList.remove('hidden');
+
+  document.getElementById('pwaInstallBtn')?.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        AppUI.showToast('Aplikasi MyCar sedang dipasang di HP Anda!', 'success');
+      }
+      deferredPrompt = null;
+      if (banner) banner.classList.add('hidden');
+    }
+  });
+});
+
+window.addEventListener('appinstalled', () => {
+  AppUI.showToast('Aplikasi MyCar berhasil dipasang di layar utama!', 'success');
+  const banner = document.getElementById('pwaInstallBanner');
+  if (banner) banner.classList.add('hidden');
+});
+
+// Register Service Worker
+if ('serviceWorker' in navigator && (window.location.protocol.startsWith('http') || window.location.protocol.startsWith('https'))) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then((reg) => console.log('[PWA] Service Worker registered with scope:', reg.scope))
+      .catch((err) => console.log('[PWA] Service Worker registration failed:', err));
+  });
+}
+
 // Global App Initialization
 document.addEventListener('DOMContentLoaded', async () => {
   await AppData.init();
   AppUI.init();
   AppCharts.init();
+
+  // Handle URL shortcut params
+  const urlParams = new URLSearchParams(window.location.search);
+  const action = urlParams.get('action');
+  if (action === 'fuel') {
+    setTimeout(() => AppUI.openAddLogModal('fuel'), 300);
+  } else if (action === 'trip') {
+    setTimeout(() => AppUI.openAddLogModal('trip'), 300);
+  } else if (action === 'maintenance') {
+    setTimeout(() => AppUI.openAddMaintModal(), 300);
+  }
 });
+

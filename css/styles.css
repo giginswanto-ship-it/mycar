@@ -1,4 +1,4 @@
-/* Custom CSS for Journal Harian Mobilku */
+/* Custom CSS for Journal Harian Mobilku (Mobile & Desktop) */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 :root {
@@ -8,11 +8,21 @@
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
+  --bottom-bar-height: 64px;
 }
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  padding-bottom: calc(var(--bottom-bar-height) + env(safe-area-inset-bottom, 16px));
+}
+
+@media (min-width: 768px) {
+  body {
+    padding-bottom: 0px;
+    user-select: auto;
+  }
 }
 
 /* Custom Scrollbar */
@@ -29,6 +39,87 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Mobile Bottom Navigation Bar */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--bottom-bar-height);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 45;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  color: #64748b;
+  font-size: 0.65rem;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.mobile-nav-item i {
+  font-size: 1.15rem;
+  margin-bottom: 2px;
+  transition: transform 0.2s ease;
+}
+
+.mobile-nav-item.active {
+  color: #2563eb;
+}
+
+.mobile-nav-item.active i {
+  transform: scale(1.15);
+}
+
+.mobile-nav-item.active::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  width: 18px;
+  height: 3px;
+  background-color: #2563eb;
+  border-radius: 9999px;
+}
+
+/* Floating Action Button (FAB) */
+.mobile-fab-center {
+  position: fixed;
+  bottom: calc(var(--bottom-bar-height) + 16px + env(safe-area-inset-bottom, 0px));
+  right: 20px;
+  z-index: 46;
+}
+
+.fab-main-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px -3px rgba(37, 99, 235, 0.4), 0 4px 6px -2px rgba(37, 99, 235, 0.2);
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.fab-main-btn:active {
+  transform: scale(0.92);
 }
 
 /* Glassmorphism & Card styling */
@@ -74,27 +165,35 @@ body {
 /* Toast styling */
 #toast-container {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: calc(var(--bottom-bar-height) + 20px);
+  right: 20px;
+  left: 20px;
   z-index: 9999;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   pointer-events: none;
+}
+
+@media (min-width: 640px) {
+  #toast-container {
+    left: auto;
+    bottom: 24px;
+    right: 24px;
+  }
 }
 
 .toast {
   pointer-events: auto;
-  min-width: 280px;
-  max-width: 400px;
-  padding: 12px 18px;
+  min-width: 260px;
+  padding: 12px 16px;
   border-radius: 12px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   color: #fff;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-weight: 500;
   animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   transition: all 0.3s ease;
@@ -103,17 +202,17 @@ body {
 @keyframes toastSlideIn {
   from {
     opacity: 0;
-    transform: translateX(100%);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
 }
 
 .toast.toast-exit {
   opacity: 0;
-  transform: translateX(100%);
+  transform: translateY(20px);
 }
 
 /* Badge styling */
@@ -129,8 +228,9 @@ body {
     background: #fff !important;
     color: #000 !important;
     font-size: 11pt;
+    padding-bottom: 0 !important;
   }
-  header, nav, .no-print, #toast-container, .modal-backdrop, .modal, button:not(.print-include) {
+  header, nav, .no-print, #toast-container, .mobile-bottom-nav, .mobile-fab-center, .modal-backdrop, .modal, button:not(.print-include) {
     display: none !important;
   }
   .tab-content {

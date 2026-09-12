@@ -1,0 +1,12 @@
+{
+  "appId": "com.mycar.logbook",
+  "appName": "Journal Harian Mobilku",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

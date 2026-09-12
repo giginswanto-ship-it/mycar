@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Journal Harian Mobilku - Car Daily Logbook</title>
   
+  <!-- Mobile & PWA Optimization -->
+  <meta name="theme-color" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MyCar">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icons/icon-192.svg">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome 6 Icons -->
@@ -102,7 +111,28 @@
   </header>
 
   <!-- Main Content Container -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+
+    <!-- Mobile Install PWA Banner (Hidden by default, shown via JS prompt) -->
+    <div id="pwaInstallBanner" class="hidden mb-4 p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl text-white shadow-lg shadow-blue-500/20 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-xl shrink-0">
+          <i class="fas fa-mobile-screen-button"></i>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold sm:text-sm">Pasang Aplikasi MyCar</h4>
+          <p class="text-xs text-blue-100">Akses cepat & offline langsung dari layar utama HP Anda.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="pwaInstallBtn" class="px-3.5 py-1.5 bg-white text-blue-700 font-bold text-xs rounded-xl shadow hover:bg-blue-50 transition whitespace-nowrap">
+          Install App
+        </button>
+        <button onclick="document.getElementById('pwaInstallBanner').classList.add('hidden')" class="p-1.5 text-blue-200 hover:text-white transition">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+    </div>
 
     <!-- ======================================================== -->
     <!-- TAB 1: DASHBOARD -->
@@ -889,6 +919,41 @@
       </form>
     </div>
   </div>
+
+  <!-- ======================================================== -->
+  <!-- MOBILE BOTTOM NAVIGATION & FLOATING ACTION BUTTON -->
+  <!-- ======================================================== -->
+
+  <!-- Floating Action Button (Mobile Only) -->
+  <div class="mobile-fab-center md:hidden">
+    <button onclick="AppUI.openAddLogModal()" class="fab-main-btn" title="Tambah Jurnal">
+      <i class="fas fa-plus text-xl"></i>
+    </button>
+  </div>
+
+  <!-- Mobile Bottom Navigation Bar (Mobile Only) -->
+  <nav class="mobile-bottom-nav md:hidden">
+    <button class="mobile-nav-item active" data-tab="dashboard" onclick="AppUI.switchTab('dashboard')">
+      <i class="fas fa-chart-pie"></i>
+      <span>Dashboard</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="logs" onclick="AppUI.switchTab('logs')">
+      <i class="fas fa-book-open"></i>
+      <span>Jurnal</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="maintenance" onclick="AppUI.switchTab('maintenance')">
+      <i class="fas fa-wrench"></i>
+      <span>Servis</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="reports" onclick="AppUI.switchTab('reports')">
+      <i class="fas fa-file-invoice-dollar"></i>
+      <span>Laporan</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="profile" onclick="AppUI.switchTab('profile')">
+      <i class="fas fa-sliders-h"></i>
+      <span>Profil</span>
+    </button>
+  </nav>
 
   <!-- Main JavaScript Files -->
   <script src="js/charts.js"></script>
